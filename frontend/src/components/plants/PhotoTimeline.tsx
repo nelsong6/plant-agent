@@ -47,7 +47,7 @@ export function PhotoTimeline({ photos, loading }: Props) {
             className="w-full aspect-square object-cover rounded-lg"
           />
           <span className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[11px] px-1.5 py-0.5 rounded">
-            {new Date(photo.date).toLocaleDateString()}
+            {new Date(photo.createdAt).toLocaleDateString()}
           </span>
         </div>
       ))}

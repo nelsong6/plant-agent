@@ -22,7 +22,6 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   isAdmin: boolean;
-  authError: string | null;
   setSession: (token: string, user: User) => void;
   logout: () => void;
 }
@@ -33,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState<string | null>(null);
 
   // Parse existing JWT on mount
   useEffect(() => {
@@ -64,19 +62,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (!res.ok) {
             const body = await res.json().catch(() => ({}));
-            setAuthError(`Login failed (${res.status}): ${body.error ?? 'unknown error'}`);
+            console.error('Login failed:', res.status, body.error);
           } else {
             const data = await res.json();
             setSession(data.token, data.user);
           }
         } catch (err) {
-          setAuthError(`Login failed: ${err instanceof Error ? err.message : String(err)} (API: ${API_BASE})`);
-        }
-      } else if (!token) {
-        // MSAL redirected back but no idToken — may indicate a silent failure
-        const accounts = msalInstance.getAllAccounts();
-        if (accounts.length > 0) {
-          setAuthError('MSAL has account but handleRedirectPromise returned no token — try signing in again');
+          console.error('Login failed:', err);
         }
       }
       setLoading(false);
@@ -96,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, isAdmin: user?.role === 'admin', authError, setSession, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, isAdmin: user?.role === 'admin', setSession, logout }}>
       {children}
     </AuthContext.Provider>
   );

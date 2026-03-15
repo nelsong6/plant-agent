@@ -6,6 +6,7 @@ export interface Plant {
   species: string;
   position: string;
   notes: string;
+  claudeNotes: string;
   createdAt: string;
   updatedAt: string;
 }

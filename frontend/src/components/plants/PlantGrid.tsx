@@ -25,7 +25,6 @@ export function PlantGrid() {
   const { isAdmin } = useAuth();
   const [showForm, setShowForm] = useState(false);
 
-  const existingRooms = [...new Set(plants.map((p) => p.room).filter(Boolean))];
   const addButton = isAdmin ? (
     <Button size="sm" onClick={() => setShowForm((f) => !f)}>
       + Add Plant
@@ -49,7 +48,6 @@ export function PlantGrid() {
         <PageHeader title="My Plants" action={addButton} />
         {showForm && (
           <AddPlantForm
-            existingRooms={existingRooms}
             onCreated={() => { refetch(); setShowForm(false); }}
             onCancel={() => setShowForm(false)}
           />
@@ -65,7 +63,6 @@ export function PlantGrid() {
         <PageHeader title="My Plants" action={addButton} />
         {showForm ? (
           <AddPlantForm
-            existingRooms={existingRooms}
             onCreated={() => { refetch(); setShowForm(false); }}
             onCancel={() => setShowForm(false)}
           />
@@ -92,7 +89,6 @@ export function PlantGrid() {
       <PageHeader title="My Plants" count={plants.length} action={addButton} />
       {showForm && (
         <AddPlantForm
-          existingRooms={existingRooms}
           onCreated={() => { refetch(); setShowForm(false); }}
           onCancel={() => setShowForm(false)}
         />

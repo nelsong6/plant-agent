@@ -1,21 +1,28 @@
-import { useParams, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { usePlant } from '../../hooks/usePlants';
 import { useEvents } from '../../hooks/useEvents';
 import { usePhotos } from '../../hooks/usePhotos';
+import { deletePlant } from '../../api/plants';
 import { PhotoTimeline } from './PhotoTimeline';
 import { EventLog } from './EventLog';
 import { LogAction } from '../actions/LogAction';
 import { ChatPanel } from '../chat/ChatPanel';
 import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Skeleton } from '../ui/Skeleton';
 
 export function PlantDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { plant, loading: plantLoading } = usePlant(id!);
   const { events, loading: eventsLoading, addEvent } = useEvents(id!);
   const { photos, loading: photosLoading } = usePhotos(id!);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   if (plantLoading) {
     return (
@@ -50,17 +57,50 @@ export function PlantDetail() {
 
       {/* Hero */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-bark-900 dark:text-bark-50">{plant.name}</h1>
-        <p className="text-bark-600 dark:text-bark-300 mt-1">{plant.species}</p>
-        <div className="flex items-center gap-2 text-sm text-bark-400 mt-1">
-          <span>{plant.room}</span>
-          <span>&middot;</span>
-          <span>{plant.position}</span>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-bark-900 dark:text-bark-50">{plant.name}</h1>
+            <p className="text-bark-600 dark:text-bark-300 mt-1">{plant.species}</p>
+            {(plant.room || plant.position) && (
+              <div className="flex items-center gap-2 text-sm text-bark-400 mt-1">
+                {plant.room && <span>{plant.room}</span>}
+                {plant.room && plant.position && <span>&middot;</span>}
+                {plant.position && <span>{plant.position}</span>}
+              </div>
+            )}
+          </div>
+          {isAdmin && (
+            <Button variant="danger" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+              Delete
+            </Button>
+          )}
         </div>
+        {plant.claudeNotes && (
+          <p className="mt-3 text-sm text-bark-600 dark:text-bark-300">{plant.claudeNotes}</p>
+        )}
         {plant.notes && (
-          <p className="mt-3 text-sm text-bark-600 dark:text-bark-300 italic">{plant.notes}</p>
+          <p className="mt-3 text-sm text-bark-500 dark:text-bark-400 italic">{plant.notes}</p>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete plant"
+        message={`Are you sure you want to delete "${plant.name}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        loading={deleting}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={async () => {
+          setDeleting(true);
+          try {
+            await deletePlant(plant.id);
+            navigate('/');
+          } catch {
+            setDeleting(false);
+            setShowDeleteConfirm(false);
+          }
+        }}
+      />
 
       {/* Actions */}
       {isAdmin && <LogAction plantId={plant.id} onAction={addEvent} />}

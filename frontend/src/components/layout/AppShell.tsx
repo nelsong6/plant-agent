@@ -26,7 +26,7 @@ function NavLink({ to, label }: { to: string; label: string }) {
 }
 
 export function AppShell() {
-  const { user, isAdmin, authError, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -135,12 +135,6 @@ export function AppShell() {
           </div>
         )}
       </nav>
-
-      {authError && (
-        <div className="bg-red-50 dark:bg-red-900/30 border-b border-red-200 dark:border-red-800 px-4 py-2 text-center">
-          <p className="text-sm text-red-700 dark:text-red-300">{authError}</p>
-        </div>
-      )}
 
       {user && !isAdmin && (
         <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 text-center">

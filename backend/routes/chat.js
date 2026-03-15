@@ -59,7 +59,7 @@ export function createChatRoutes({ plantsContainer, eventsContainer, requireAuth
       // Stream from Claude
       const client = new Anthropic({ apiKey: anthropicApiKey });
       const stream = await client.messages.stream({
-        model: 'claude-sonnet-4-6-20250514',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 2048,
         system: systemPrompt,
         messages,

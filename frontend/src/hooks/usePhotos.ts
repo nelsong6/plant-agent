@@ -4,7 +4,7 @@ import { apiFetch } from '../api/client';
 export interface Photo {
   url: string;
   name: string;
-  date: string;
+  createdAt: string;
 }
 
 export function usePhotos(plantId: string) {

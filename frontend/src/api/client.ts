@@ -11,7 +11,14 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let res: Response | undefined;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    if (res.status !== 503) break;
+    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+  }
+
+  if (!res) throw new Error('No response');
 
   if (res.status === 401) {
     localStorage.removeItem('token');

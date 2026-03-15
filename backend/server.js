@@ -60,9 +60,9 @@ async function startServer() {
   });
 
   // API routes
-  app.use(createPlantRoutes({ plantsContainer, requireAuth }));
+  app.use(createPlantRoutes({ plantsContainer, requireAuth, anthropicApiKey: config.anthropicApiKey, storageAccountEndpoint: config.storageAccountEndpoint }));
   app.use(createEventRoutes({ eventsContainer, requireAuth }));
-  app.use(createPhotoRoutes({ requireAuth, storageAccountEndpoint: config.storageAccountEndpoint }));
+  app.use(createPhotoRoutes({ requireAuth, storageAccountEndpoint: config.storageAccountEndpoint, plantsContainer }));
   app.use(createCaptureRoutes({ requireAuth }));
   app.use(createAnalysisRoutes({ analysesContainer, requireAuth }));
   app.use(createTaskRoutes({ plantsContainer, eventsContainer, requireAuth }));
