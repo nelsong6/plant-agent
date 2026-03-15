@@ -1,0 +1,29 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Backend
+backend/node_modules/
+backend/.env
+
+# Pi
+pi/.venv/
+pi/.env
+pi/__pycache__/
+pi/src/**/__pycache__/
+*.pyc
+
+# OpenTofu
+tofu/.terraform/
+tofu/*.tfstate*
+tofu/.terraform.lock.hcl
+tofu/tfplan
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

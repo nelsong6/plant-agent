@@ -1,0 +1,29 @@
+[project]
+name = "plant-eye"
+version = "0.1.0"
+description = "Raspberry Pi camera service for plant monitoring"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi~=0.115.0",
+    "uvicorn[standard]~=0.34.0",
+    "pydantic-settings~=2.7.0",
+    "Pillow~=11.1.0",
+]
+
+[project.optional-dependencies]
+hardware = [
+    "smbus2~=0.5.0",
+]
+dev = [
+    "ruff",
+    "pyright",
+    "pytest",
+    "httpx",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.pyright]
+pythonVersion = "3.11"
