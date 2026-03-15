@@ -6,6 +6,11 @@ locals {
   back_app_dns_name = "${local.front_app_dns_name}.api"
 }
 
+data "azurerm_user_assigned_identity" "shared" {
+  name                = "infra-shared-identity"
+  resource_group_name = local.infra.resource_group_name
+}
+
 resource "azurerm_container_app" "plant_agent_api" {
   for_each                     = toset(["plant-agent-api"])
   name                         = each.key
@@ -14,7 +19,8 @@ resource "azurerm_container_app" "plant_agent_api" {
   revision_mode                = "Single"
 
   identity {
-    type = "SystemAssigned"
+    type         = "UserAssigned"
+    identity_ids = [local.infra.shared_identity_id]
   }
 
   template {
@@ -27,6 +33,11 @@ resource "azurerm_container_app" "plant_agent_api" {
       env {
         name  = "PORT"
         value = "3000"
+      }
+
+      env {
+        name  = "AZURE_CLIENT_ID"
+        value = data.azurerm_user_assigned_identity.shared.client_id
       }
 
       env {
@@ -84,29 +95,6 @@ resource "azurerm_container_app" "plant_agent_api" {
       template[0].container[0].image
     ]
   }
-}
-
-# Grant Container App managed identity access to Cosmos DB
-resource "azurerm_cosmosdb_sql_role_assignment" "container_app_cosmos" {
-  resource_group_name = local.infra.resource_group_name
-  account_name        = local.infra.cosmos_db_account_name
-  role_definition_id  = "${local.infra.cosmos_db_account_id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
-  principal_id        = azurerm_container_app.plant_agent_api["plant-agent-api"].identity[0].principal_id
-  scope               = local.infra.cosmos_db_account_id
-}
-
-# Grant Container App managed identity read access to Azure App Configuration
-resource "azurerm_role_assignment" "container_app_appconfig_reader" {
-  scope                = local.infra.azure_app_config_resource_id
-  role_definition_name = "App Configuration Data Reader"
-  principal_id         = azurerm_container_app.plant_agent_api["plant-agent-api"].identity[0].principal_id
-}
-
-# Grant Container App managed identity read access to Key Vault secrets
-resource "azurerm_role_assignment" "container_app_keyvault_reader" {
-  scope                = data.azurerm_key_vault.main.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_container_app.plant_agent_api["plant-agent-api"].identity[0].principal_id
 }
 
 # ============================================================================

@@ -27,13 +27,6 @@ resource "azurerm_storage_container" "photos" {
   container_access_type = "blob"
 }
 
-# Grant Container App managed identity write access to blob storage
-resource "azurerm_role_assignment" "container_app_storage_contributor" {
-  scope                = azurerm_storage_account.plant_photos.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_container_app.plant_agent_api["plant-agent-api"].identity[0].principal_id
-}
-
 # Lifecycle policy: cool after 30 days, delete after 1 year
 resource "azurerm_storage_management_policy" "lifecycle" {
   storage_account_id = azurerm_storage_account.plant_photos.id
