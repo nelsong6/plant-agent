@@ -12,7 +12,8 @@ Plant monitoring system: Raspberry Pi + camera captures photos of houseplants, u
 ## Key Decisions
 
 - Pi networking: Cloudflare Tunnel (pi.romaine.life → localhost:8420)
-- Photo upload: Backend proxies — Pi returns JPEG bytes, backend uploads to blob via managed identity
+- Photo upload: Backend proxies — Pi returns JPEG bytes, backend uploads to blob via shared managed identity
+- Managed identity: User-assigned `infra-shared-identity` from infra-bootstrap, pre-configured with Cosmos, App Config, Key Vault, and Storage roles
 - Auth: Local username/password with JWT (no Auth0). Public view-only access for browsing plants, photos, events, tasks, and analyses. Login required for management actions (CRUD, logging events, chat, capture, analysis triggers)
 - Database: Cosmos DB PlantAgentDB in shared infra-cosmos (free tier)
 - AI: Claude claude-sonnet-4-6 via Anthropic API for plant analysis and chat
@@ -23,3 +24,4 @@ Plant monitoring system: Raspberry Pi + camera captures photos of houseplants, u
 - **2026-03-14** — Initial scaffold: repo structure, tofu infra, GitHub Actions workflows, Pi FastAPI stubs, backend Express skeleton, frontend React scaffold
 - **2026-03-14** — Deep implementations: PlantDetail view (PhotoTimeline, EventLog, LogAction), TaskQueue with backend computation, ChatPanel with Claude SSE streaming, PhotoBrowser, public/auth access split
 - **2026-03-14** — Switch Container App to shared user-assigned managed identity (infra-shared-identity) from infra-bootstrap; remove per-app role assignments for Cosmos, App Config, Key Vault, Storage
+- **2026-03-14** — Add SWA navigation fallback config (`staticwebapp.config.json`), root `package.json` with `concurrently` for `npm run dev`, backend `.env` for local dev against real Azure resources, gitignore `*.tsbuildinfo` and root `node_modules/`
