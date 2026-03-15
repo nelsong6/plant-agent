@@ -141,7 +141,7 @@ resource "azurerm_container_app_custom_domain" "plant_agent_api" {
 # 3b. Azure Managed Certificate
 resource "azapi_resource" "plant_agent_api_managed_cert" {
   type      = "Microsoft.App/ManagedEnvironments/managedCertificates@2024-03-01"
-  name      = "plant-agent-api-cert"
+  name      = "plants-api-cert"
   parent_id = local.infra.container_app_environment_id
   location  = var.location
 
