@@ -12,7 +12,7 @@ import { Skeleton } from '../ui/Skeleton';
 
 export function PlantDetail() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const { plant, loading: plantLoading } = usePlant(id!);
   const { events, loading: eventsLoading, addEvent } = useEvents(id!);
   const { photos, loading: photosLoading } = usePhotos(id!);
@@ -63,7 +63,7 @@ export function PlantDetail() {
       </div>
 
       {/* Actions */}
-      {user && <LogAction plantId={plant.id} onAction={addEvent} />}
+      {isAdmin && <LogAction plantId={plant.id} onAction={addEvent} />}
 
       {/* Two-column: Photos + Events */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -78,7 +78,7 @@ export function PlantDetail() {
       </div>
 
       {/* Chat */}
-      {user && (
+      {isAdmin && (
         <div className="mt-6">
           <Card className="p-5">
             <h2 className="text-lg font-semibold text-bark-900 dark:text-bark-50 mb-4">Chat</h2>

@@ -26,7 +26,7 @@ function NavLink({ to, label }: { to: string; label: string }) {
 }
 
 export function AppShell() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -87,8 +87,17 @@ export function AppShell() {
                   </button>
                 </>
               ) : (
-                <button onClick={loginWithMicrosoft} className="text-sm font-medium text-leaf-600 hover:text-leaf-700 transition-colors">
-                  Sign In
+                <button
+                  onClick={loginWithMicrosoft}
+                  className="inline-flex items-center gap-3 px-3 py-2 rounded border border-[#8C8C8C] bg-white text-[#5E5E5E] text-sm font-semibold cursor-pointer hover:bg-[#F2F2F2] active:bg-[#E1E1E1] transition-colors dark:bg-[#2F2F2F] dark:text-white dark:border-[#8C8C8C] dark:hover:bg-[#3A3A3A] dark:active:bg-[#444444]"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+                    <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+                    <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+                    <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+                    <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+                  </svg>
+                  Sign in with Microsoft
                 </button>
               )}
 
@@ -126,6 +135,12 @@ export function AppShell() {
           </div>
         )}
       </nav>
+
+      {user && !isAdmin && (
+        <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 text-center">
+          <p className="text-sm text-amber-700 dark:text-amber-300">Your account has view-only privileges</p>
+        </div>
+      )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Outlet />

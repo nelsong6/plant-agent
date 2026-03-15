@@ -39,6 +39,9 @@ export function createEventRoutes({ eventsContainer, requireAuth }) {
   });
 
   router.post('/api/plants/:plantId/events', requireAuth, async (req, res) => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin only' });
+    }
     try {
       const event = {
         id: `evt-${crypto.randomUUID()}`,

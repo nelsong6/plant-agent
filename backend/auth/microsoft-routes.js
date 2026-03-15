@@ -2,7 +2,7 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 
-const ALLOWED_EMAIL = 'fullnelsongrip@gmail.com';
+const ALLOWED_EMAIL = 'nelson-devops-project@outlook.com';
 
 const client = jwksClient({
   jwksUri: 'https://login.microsoftonline.com/common/discovery/v2.0/keys',
@@ -61,11 +61,8 @@ export function createMicrosoftRoutes({ jwtSecret, microsoftClientId, container 
       const payload = await verifyMicrosoftToken(credential, microsoftClientId);
       const email = payload.email || payload.preferred_username;
 
-      if (email !== ALLOWED_EMAIL) {
-        return res.status(403).json({ error: 'Unauthorized account' });
-      }
-
       const id = `microsoft|${payload.sub}`;
+      const role = email === ALLOWED_EMAIL ? 'admin' : 'viewer';
       const account = {
         id,
         userId: id,
@@ -73,7 +70,7 @@ export function createMicrosoftRoutes({ jwtSecret, microsoftClientId, container 
         provider: 'microsoft',
         name: payload.name,
         email,
-        role: 'admin',
+        role,
         updatedAt: new Date().toISOString(),
       };
 

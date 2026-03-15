@@ -2,10 +2,13 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import type { User } from '../types';
 import { msalInstance, msalReady } from './msal';
 
+const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+
 interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
+  isAdmin: boolean;
   setSession: (token: string, user: User) => void;
   logout: () => void;
 }
@@ -38,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response?.idToken) {
         try {
-          const res = await fetch('/auth/microsoft/login', {
+          const res = await fetch(`${API_BASE}/auth/microsoft/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ credential: response.idToken }),
@@ -72,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, setSession, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, isAdmin: user?.role === 'admin', setSession, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,6 +12,9 @@ export function createChatRoutes({ plantsContainer, eventsContainer, requireAuth
   const router = Router();
 
   router.post('/api/plants/:plantId/chat', requireAuth, async (req, res) => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin only' });
+    }
     const { plantId } = req.params;
     const { message, history = [] } = req.body;
 
