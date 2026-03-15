@@ -69,6 +69,5 @@ export async function fetchAppConfig() {
     console.warn('[appConfig] Anthropic API key not found — AI chat will be unavailable');
   }
 
-  console.log('[appConfig] Application config loaded from App Configuration + Key Vault');
   return config;
 }

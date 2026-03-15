@@ -50,7 +50,6 @@ async function startServer() {
   const eventsContainer = database.container('events');
   const analysesContainer = database.container('analyses');
   const chatsContainer = database.container('chats');
-  console.log('Connected to Cosmos DB');
 
   // Auth routes
   app.use(createMicrosoftRoutes({ jwtSecret: config.jwtSigningSecret, microsoftClientId: config.microsoftClientId, container: plantsContainer }));
@@ -81,16 +80,14 @@ async function startServer() {
   });
 
   serverReady = true;
-  console.log('Server ready');
+  console.log(`Server ready on port ${PORT}`);
 }
 
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}, initializing...`);
-});
-
-startServer().catch((error) => {
-  console.error('Fatal startup error:', error);
-  process.exit(1);
+  startServer().catch((error) => {
+    console.error('Fatal startup error:', error);
+    process.exit(1);
+  });
 });
 
 export default app;
