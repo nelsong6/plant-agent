@@ -13,7 +13,7 @@ resource "azurerm_static_web_app" "plant_agent" {
 }
 
 locals {
-  front_app_dns_name = "plant"
+  front_app_dns_name = "plants"
 }
 
 resource "azurerm_dns_cname_record" "plant_agent" {
