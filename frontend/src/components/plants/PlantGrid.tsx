@@ -1,22 +1,57 @@
 import { Link } from 'react-router-dom';
 import { usePlants } from '../../hooks/usePlants';
+import { Card } from '../ui/Card';
+import { PageHeader } from '../ui/PageHeader';
+import { SkeletonCard } from '../ui/Skeleton';
+import { EmptyState } from '../ui/EmptyState';
+import { ErrorBanner } from '../ui/ErrorBanner';
+
+function LeafIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 8c.7-1 1-2.2 1-3.5C18 2.5 16.5 1 14.5 1c-1 0-2 .5-2.5 1.2C11.5 1.5 10.5 1 9.5 1 7.5 1 6 2.5 6 4.5c0 1.3.3 2.5 1 3.5" />
+      <path d="M12 2v20" />
+      <path d="M6 8c-1.5 1.5-3 4-3 7 0 4 2.5 7 9 7s9-3 9-7c0-3-1.5-5.5-3-7" />
+    </svg>
+  );
+}
 
 export function PlantGrid() {
   const { plants, loading, error } = usePlants();
 
-  if (loading) return <p>Loading plants...</p>;
-  if (error) return <p>Error: {error}</p>;
-
-  if (plants.length === 0) {
+  if (loading) {
     return (
       <div>
-        <h2>No plants yet</h2>
-        <p>Add your first plant to get started.</p>
+        <PageHeader title="My Plants" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)}
+        </div>
       </div>
     );
   }
 
-  // Group by room
+  if (error) {
+    return (
+      <div>
+        <PageHeader title="My Plants" />
+        <ErrorBanner message={error} />
+      </div>
+    );
+  }
+
+  if (plants.length === 0) {
+    return (
+      <div>
+        <PageHeader title="My Plants" />
+        <EmptyState
+          icon={<LeafIcon className="w-12 h-12" />}
+          title="No plants yet"
+          description="Add your first plant to get started."
+        />
+      </div>
+    );
+  }
+
   const rooms = new Map<string, typeof plants>();
   for (const plant of plants) {
     const room = plant.room || 'Unassigned';
@@ -26,27 +61,24 @@ export function PlantGrid() {
 
   return (
     <div>
-      <h2>Plants ({plants.length})</h2>
+      <PageHeader title="My Plants" count={plants.length} />
       {[...rooms.entries()].map(([room, roomPlants]) => (
-        <div key={room} style={{ marginBottom: 24 }}>
-          <h3 style={{ color: '#666', fontSize: 14, textTransform: 'uppercase', letterSpacing: 1 }}>
+        <div key={room} className="mb-8">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-bark-500 dark:text-bark-400 mb-3">
             {room}
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {roomPlants.map((plant) => (
-              <Link
-                key={plant.id}
-                to={`/plants/${plant.id}`}
-                style={{
-                  textDecoration: 'none', color: 'inherit',
-                  border: '1px solid #e5e7eb', borderRadius: 8, padding: 16,
-                  transition: 'border-color 0.15s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#3b82f6')}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#e5e7eb')}
-              >
-                <h3 style={{ margin: 0, fontSize: 16 }}>{plant.name}</h3>
-                <p style={{ color: '#666', fontSize: 13, margin: '4px 0 0' }}>{plant.species}</p>
+              <Link key={plant.id} to={`/plants/${plant.id}`} className="no-underline text-inherit">
+                <Card hover>
+                  <div className="h-32 bg-leaf-50 dark:bg-leaf-900/30 flex items-center justify-center">
+                    <LeafIcon className="w-10 h-10 text-leaf-300" />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-medium text-bark-900 dark:text-bark-50">{plant.name}</h3>
+                    <p className="text-sm text-bark-500 dark:text-bark-400 mt-0.5">{plant.species}</p>
+                  </div>
+                </Card>
               </Link>
             ))}
           </div>

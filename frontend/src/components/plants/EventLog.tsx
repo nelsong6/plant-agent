@@ -1,17 +1,20 @@
 import type { PlantEvent } from '../../types';
+import { Badge } from '../ui/Badge';
+import { EmptyState } from '../ui/EmptyState';
+import { SkeletonRow } from '../ui/Skeleton';
 
 interface Props {
   events: PlantEvent[];
   loading: boolean;
 }
 
-const EVENT_LABELS: Record<string, { label: string; color: string }> = {
-  watered: { label: 'Watered', color: '#3b82f6' },
-  fertilized: { label: 'Fertilized', color: '#22c55e' },
-  repotted: { label: 'Repotted', color: '#a855f7' },
-  pruned: { label: 'Pruned', color: '#f97316' },
-  analysis: { label: 'Analysis', color: '#06b6d4' },
-  note: { label: 'Note', color: '#6b7280' },
+const EVENT_LABELS: Record<string, string> = {
+  watered: 'Watered',
+  fertilized: 'Fertilized',
+  repotted: 'Repotted',
+  pruned: 'Pruned',
+  analysis: 'Analysis',
+  note: 'Note',
 };
 
 function formatDate(dateStr: string): string {
@@ -27,35 +30,33 @@ function formatDate(dateStr: string): string {
 }
 
 export function EventLog({ events, loading }: Props) {
-  if (loading) return <p>Loading events...</p>;
+  if (loading) {
+    return (
+      <div className="space-y-1">
+        {Array.from({ length: 4 }, (_, i) => <SkeletonRow key={i} />)}
+      </div>
+    );
+  }
 
   if (events.length === 0) {
-    return <p style={{ color: '#999' }}>No events logged yet.</p>;
+    return <EmptyState title="No events yet" description="Log a care action to start tracking." />;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {events.map((event) => {
-        const meta = EVENT_LABELS[event.type] || { label: event.type, color: '#6b7280' };
-        return (
-          <div key={event.id} style={{
-            display: 'flex', alignItems: 'flex-start', gap: 10,
-            padding: '8px 0', borderBottom: '1px solid #f0f0f0',
-          }}>
-            <span style={{
-              background: meta.color, color: '#fff',
-              fontSize: 11, padding: '2px 8px', borderRadius: 12,
-              whiteSpace: 'nowrap', marginTop: 2,
-            }}>
-              {meta.label}
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {event.notes && <p style={{ margin: 0, fontSize: 14 }}>{event.notes}</p>}
-              <p style={{ margin: 0, fontSize: 12, color: '#999' }}>{formatDate(event.date)}</p>
-            </div>
+    <div className="divide-y divide-bark-100 dark:divide-bark-700">
+      {events.map((event) => (
+        <div key={event.id} className="flex items-start gap-3 py-3">
+          <Badge variant={event.type}>
+            {EVENT_LABELS[event.type] || event.type}
+          </Badge>
+          <div className="flex-1 min-w-0">
+            {event.notes && (
+              <p className="text-sm text-bark-800 dark:text-bark-100">{event.notes}</p>
+            )}
+            <p className="text-xs text-bark-400 mt-0.5">{formatDate(event.date)}</p>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

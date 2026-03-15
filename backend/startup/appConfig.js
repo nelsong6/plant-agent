@@ -38,10 +38,11 @@ export async function fetchAppConfig() {
     ]);
 
   // Key Vault: per-app secrets
-  const [jwtSigningSecret, anthropicApiKey] = (
+  const [jwtSigningSecret, anthropicApiKey, googleClientId] = (
     await Promise.all([
       kvClient.getSecret('plant-agent-jwt-signing-secret'),
       kvClient.getSecret('plant-agent-anthropic-api-key').catch(() => ({ value: null })),
+      kvClient.getSecret('plant-agent-google-client-id'),
     ])
   ).map((s) => s.value);
 
@@ -50,9 +51,10 @@ export async function fetchAppConfig() {
     storageAccountEndpoint: storageEndpointSetting.value,
     jwtSigningSecret,
     anthropicApiKey,
+    googleClientId,
   };
 
-  const required = ['cosmosDbEndpoint', 'storageAccountEndpoint', 'jwtSigningSecret'];
+  const required = ['cosmosDbEndpoint', 'storageAccountEndpoint', 'jwtSigningSecret', 'googleClientId'];
   for (const key of required) {
     if (!config[key]) {
       throw new Error(`Configuration value "${key}" is missing or empty.`);

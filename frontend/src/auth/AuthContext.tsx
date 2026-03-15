@@ -4,7 +4,7 @@ import type { User } from '../types';
 interface AuthState {
   user: User | null;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  setSession: (token: string, user: User) => void;
   logout: () => void;
 }
 
@@ -26,22 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
-  async function login(username: string, password: string) {
-    const res = await fetch('/auth/local/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error || 'Login failed');
-    }
-
-    const data = await res.json();
-    localStorage.setItem('token', data.token);
-    setToken(data.token);
-    setUser(data.user);
+  function setSession(newToken: string, newUser: User) {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    setUser(newUser);
   }
 
   function logout() {
@@ -51,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, setSession, logout }}>
       {children}
     </AuthContext.Provider>
   );

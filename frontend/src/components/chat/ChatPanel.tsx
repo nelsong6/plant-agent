@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Button } from '../ui/Button';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -7,6 +8,16 @@ interface Message {
 
 interface Props {
   plantId: string;
+}
+
+function StreamingDots() {
+  return (
+    <span className="inline-flex gap-1 items-center">
+      <span className="w-1.5 h-1.5 bg-bark-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+      <span className="w-1.5 h-1.5 bg-bark-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+      <span className="w-1.5 h-1.5 bg-bark-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+    </span>
+  );
 }
 
 export function ChatPanel({ plantId }: Props) {
@@ -28,7 +39,6 @@ export function ChatPanel({ plantId }: Props) {
     setInput('');
     setStreaming(true);
 
-    // Add placeholder assistant message
     setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
     try {
@@ -99,41 +109,35 @@ export function ChatPanel({ plantId }: Props) {
   }
 
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
-      <div style={{ height: 320, overflowY: 'auto', padding: 16 }}>
+    <div className="border border-bark-100 dark:border-bark-700 rounded-xl overflow-hidden">
+      {/* Messages */}
+      <div className="h-80 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
-          <p style={{ color: '#999', textAlign: 'center', marginTop: 80 }}>
+          <p className="text-bark-400 text-center mt-20 text-sm">
             Ask a question about this plant...
           </p>
         )}
         {messages.map((msg, i) => (
           <div
             key={i}
-            style={{
-              marginBottom: 12,
-              display: 'flex',
-              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-            }}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              style={{
-                maxWidth: '80%',
-                padding: '8px 12px',
-                borderRadius: 12,
-                background: msg.role === 'user' ? '#3b82f6' : '#f3f4f6',
-                color: msg.role === 'user' ? '#fff' : '#111',
-                whiteSpace: 'pre-wrap',
-                fontSize: 14,
-                lineHeight: 1.5,
-              }}
+              className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+                msg.role === 'user'
+                  ? 'bg-leaf-500 text-white rounded-2xl rounded-br-sm'
+                  : 'bg-bark-100 dark:bg-bark-700 text-bark-800 dark:text-bark-100 rounded-2xl rounded-bl-sm'
+              }`}
             >
-              {msg.content || (streaming && i === messages.length - 1 ? '...' : '')}
+              {msg.content || (streaming && i === messages.length - 1 ? <StreamingDots /> : '')}
             </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div style={{ borderTop: '1px solid #e5e7eb', display: 'flex', padding: 8, gap: 8 }}>
+
+      {/* Input */}
+      <div className="border-t border-bark-100 dark:border-bark-700 p-3 flex gap-2">
         <input
           type="text"
           value={input}
@@ -141,18 +145,15 @@ export function ChatPanel({ plantId }: Props) {
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Ask about this plant..."
           disabled={streaming}
-          style={{ flex: 1, padding: 8, border: '1px solid #d1d5db', borderRadius: 6 }}
+          className="flex-1 rounded-lg border border-bark-200 dark:border-bark-600 bg-white dark:bg-bark-700 text-bark-800 dark:text-bark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-500 disabled:opacity-50"
         />
-        <button
+        <Button
           onClick={handleSend}
           disabled={streaming || !input.trim()}
-          style={{
-            padding: '8px 16px', background: '#3b82f6', color: '#fff',
-            border: 'none', borderRadius: 6, cursor: 'pointer',
-          }}
+          size="sm"
         >
-          {streaming ? 'Thinking...' : 'Send'}
-        </button>
+          Send
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from '../ui/Button';
 
 interface Props {
   plantId: string;
@@ -6,11 +7,18 @@ interface Props {
 }
 
 const ACTIONS = [
-  { type: 'watered', label: 'Watered', color: '#3b82f6' },
-  { type: 'fertilized', label: 'Fertilized', color: '#22c55e' },
-  { type: 'repotted', label: 'Repotted', color: '#a855f7' },
-  { type: 'pruned', label: 'Pruned', color: '#f97316' },
+  { type: 'watered', label: 'Watered', variant: 'water' as const },
+  { type: 'fertilized', label: 'Fertilized', variant: 'fertilize' as const },
+  { type: 'repotted', label: 'Repotted', variant: 'repot' as const },
+  { type: 'pruned', label: 'Pruned', variant: 'prune' as const },
 ];
+
+const ACTION_COLORS: Record<string, string> = {
+  watered: 'bg-water text-white hover:bg-water/90',
+  fertilized: 'bg-fertilize text-white hover:bg-fertilize/90',
+  repotted: 'bg-repot text-white hover:bg-repot/90',
+  pruned: 'bg-prune text-white hover:bg-prune/90',
+};
 
 export function LogAction({ onAction }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
@@ -44,40 +52,33 @@ export function LogAction({ onAction }: Props) {
   }
 
   return (
-    <div style={{ marginTop: 16, padding: 16, background: '#f9fafb', borderRadius: 8 }}>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <div className="bg-leaf-50/50 dark:bg-leaf-900/20 rounded-xl border border-leaf-100 dark:border-leaf-800 p-4">
+      <div className="flex flex-wrap gap-2">
         {ACTIONS.map((action) => (
           <button
             key={action.type}
             onClick={() => handleQuickAction(action.type)}
             disabled={busy !== null}
-            style={{
-              background: action.color, color: '#fff', border: 'none',
-              padding: '8px 16px', borderRadius: 6, cursor: 'pointer',
-              opacity: busy && busy !== action.type ? 0.5 : 1,
-              fontSize: 14,
-            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${ACTION_COLORS[action.type]}`}
           >
             {busy === action.type ? 'Logging...' : action.label}
           </button>
         ))}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setShowNotes(!showNotes)}
-          style={{
-            background: '#6b7280', color: '#fff', border: 'none',
-            padding: '8px 16px', borderRadius: 6, cursor: 'pointer', fontSize: 14,
-          }}
         >
           + Note
-        </button>
+        </Button>
       </div>
 
       {showNotes && (
-        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+        <div className="flex gap-2 mt-3">
           <select
             value={noteType}
             onChange={(e) => setNoteType(e.target.value)}
-            style={{ padding: 8 }}
+            className="rounded-lg border border-bark-200 dark:border-bark-600 px-3 py-2 text-sm bg-white dark:bg-bark-700 text-bark-800 dark:text-bark-100 focus:outline-none focus:ring-2 focus:ring-leaf-500"
           >
             <option value="note">Note</option>
             {ACTIONS.map((a) => <option key={a.type} value={a.type}>{a.label}</option>)}
@@ -88,11 +89,11 @@ export function LogAction({ onAction }: Props) {
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleNote()}
-            style={{ flex: 1, padding: 8 }}
+            className="flex-1 rounded-lg border border-bark-200 dark:border-bark-600 bg-white dark:bg-bark-700 text-bark-800 dark:text-bark-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-leaf-500"
           />
-          <button onClick={handleNote} disabled={busy !== null} style={{ padding: '8px 16px' }}>
+          <Button size="sm" onClick={handleNote} disabled={busy !== null}>
             Save
-          </button>
+          </Button>
         </div>
       )}
     </div>

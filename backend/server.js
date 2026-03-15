@@ -7,7 +7,7 @@ import { CosmosClient } from '@azure/cosmos';
 import { DefaultAzureCredential } from '@azure/identity';
 import { createRequireAuth } from './middleware/auth.js';
 import { fetchAppConfig } from './startup/appConfig.js';
-import { createLocalRoutes } from './auth/local-routes.js';
+import { createGoogleRoutes } from './auth/google-routes.js';
 import { createPlantRoutes } from './routes/plants.js';
 import { createEventRoutes } from './routes/events.js';
 import { createPhotoRoutes } from './routes/photos.js';
@@ -52,7 +52,7 @@ async function startServer() {
   console.log('Connected to Cosmos DB');
 
   // Auth routes
-  app.use(createLocalRoutes({ jwtSecret: config.jwtSigningSecret, container: plantsContainer, requireAuth }));
+  app.use(createGoogleRoutes({ jwtSecret: config.jwtSigningSecret, googleClientId: config.googleClientId, container: plantsContainer }));
 
   // Health
   app.get('/health', (req, res) => {

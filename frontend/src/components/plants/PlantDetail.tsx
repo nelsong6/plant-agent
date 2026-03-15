@@ -7,6 +7,8 @@ import { PhotoTimeline } from './PhotoTimeline';
 import { EventLog } from './EventLog';
 import { LogAction } from '../actions/LogAction';
 import { ChatPanel } from '../chat/ChatPanel';
+import { Card } from '../ui/Card';
+import { Skeleton } from '../ui/Skeleton';
 
 export function PlantDetail() {
   const { id } = useParams<{ id: string }>();
@@ -15,39 +17,73 @@ export function PlantDetail() {
   const { events, loading: eventsLoading, addEvent } = useEvents(id!);
   const { photos, loading: photosLoading } = usePhotos(id!);
 
-  if (plantLoading) return <p>Loading...</p>;
-  if (!plant) return <p>Plant not found. <Link to="/">Back to plants</Link></p>;
+  if (plantLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-4 w-40" />
+      </div>
+    );
+  }
+
+  if (!plant) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-bark-500 dark:text-bark-400">Plant not found.</p>
+        <Link to="/" className="text-leaf-600 hover:text-leaf-700 text-sm mt-2 inline-block">
+          Back to plants
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <Link to="/" style={{ color: '#666', textDecoration: 'none', fontSize: 14 }}>
-        &larr; All Plants
-      </Link>
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-bark-500 dark:text-bark-400 mb-4">
+        <Link to="/" className="hover:text-bark-700 dark:hover:text-bark-200 transition-colors">Plants</Link>
+        <span>/</span>
+        <span className="text-bark-800 dark:text-bark-100">{plant.name}</span>
+      </nav>
 
-      <div style={{ marginTop: 16 }}>
-        <h1 style={{ margin: 0 }}>{plant.name}</h1>
-        <p style={{ color: '#666', margin: '4px 0' }}>{plant.species}</p>
-        <p style={{ color: '#999', fontSize: 14 }}>{plant.room} &middot; {plant.position}</p>
-        {plant.notes && <p style={{ marginTop: 8, fontStyle: 'italic' }}>{plant.notes}</p>}
+      {/* Hero */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-bark-900 dark:text-bark-50">{plant.name}</h1>
+        <p className="text-bark-600 dark:text-bark-300 mt-1">{plant.species}</p>
+        <div className="flex items-center gap-2 text-sm text-bark-400 mt-1">
+          <span>{plant.room}</span>
+          <span>&middot;</span>
+          <span>{plant.position}</span>
+        </div>
+        {plant.notes && (
+          <p className="mt-3 text-sm text-bark-600 dark:text-bark-300 italic">{plant.notes}</p>
+        )}
       </div>
 
+      {/* Actions */}
       {user && <LogAction plantId={plant.id} onAction={addEvent} />}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginTop: 24 }}>
-        <div>
-          <h2>Photos</h2>
+      {/* Two-column: Photos + Events */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <Card className="p-5">
+          <h2 className="text-lg font-semibold text-bark-900 dark:text-bark-50 mb-4">Photos</h2>
           <PhotoTimeline photos={photos} loading={photosLoading} />
-        </div>
-        <div>
-          <h2>Event Log</h2>
+        </Card>
+        <Card className="p-5">
+          <h2 className="text-lg font-semibold text-bark-900 dark:text-bark-50 mb-4">Event Log</h2>
           <EventLog events={events} loading={eventsLoading} />
-        </div>
+        </Card>
       </div>
 
+      {/* Chat */}
       {user && (
-        <div style={{ marginTop: 24 }}>
-          <h2>Chat</h2>
-          <ChatPanel plantId={plant.id} />
+        <div className="mt-6">
+          <Card className="p-5">
+            <h2 className="text-lg font-semibold text-bark-900 dark:text-bark-50 mb-4">Chat</h2>
+            <ChatPanel plantId={plant.id} />
+          </Card>
         </div>
       )}
     </div>
