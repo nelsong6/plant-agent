@@ -22,3 +22,4 @@ Plant monitoring system: Raspberry Pi + camera captures photos of houseplants, u
 
 - **2026-03-14** — Initial scaffold: repo structure, tofu infra, GitHub Actions workflows, Pi FastAPI stubs, backend Express skeleton, frontend React scaffold
 - **2026-03-14** — Deep implementations: PlantDetail view (PhotoTimeline, EventLog, LogAction), TaskQueue with backend computation, ChatPanel with Claude SSE streaming, PhotoBrowser, public/auth access split
+- **2026-03-14** — Switch Container App to shared user-assigned managed identity (infra-shared-identity) from infra-bootstrap; remove per-app role assignments for Cosmos, App Config, Key Vault, Storage
