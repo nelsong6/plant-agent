@@ -1,67 +1,60 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+import { msalInstance, msalReady } from './msal';
 
 export function LoginPage() {
   const { setSession, user } = useAuth();
   const navigate = useNavigate();
-  const buttonRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Redirect if already logged in
   useEffect(() => {
     if (user) navigate('/', { replace: true });
   }, [user, navigate]);
 
+  // Handle redirect response from Microsoft
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.onload = () => {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-      });
-      if (buttonRef.current) {
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          theme: 'outline',
-          size: 'large',
-          width: 320,
-          text: 'signin_with',
-        });
+    let cancelled = false;
+    (async () => {
+      await msalReady;
+      const response = await msalInstance.handleRedirectPromise();
+      if (cancelled) return;
+
+      if (response?.idToken) {
+        try {
+          const res = await fetch('/auth/microsoft/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: response.idToken }),
+          });
+
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.error || 'Login failed');
+          }
+
+          const data = await res.json();
+          setSession(data.token, data.user);
+          navigate('/', { replace: true });
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Login failed');
+        }
       }
-    };
-    document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  async function handleCredentialResponse(response: { credential: string }) {
-    setError('');
-    setLoading(true);
-    try {
-      const res = await fetch('/auth/google/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential }),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || 'Login failed');
-      }
-
-      const data = await res.json();
-      setSession(data.token, data.user);
-      navigate('/', { replace: true });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
-    }
+  async function handleMicrosoftLogin() {
+    await msalReady;
+    await msalInstance.loginRedirect({
+      scopes: ['openid', 'profile', 'email'],
+    });
   }
+
+  if (loading) return null;
 
   return (
     <div className="min-h-screen bg-leaf-50 dark:bg-bark-900 flex items-center justify-center px-4">
@@ -82,12 +75,19 @@ export function LoginPage() {
           <p className="text-sm text-bark-500 dark:text-bark-400 text-center mt-1 mb-6">Plant monitoring dashboard</p>
 
           <div className="flex justify-center">
-            <div ref={buttonRef} />
+            <button
+              onClick={handleMicrosoftLogin}
+              className="flex items-center gap-3 px-6 py-2.5 border border-bark-300 dark:border-bark-600 rounded-lg bg-white dark:bg-bark-700 hover:bg-bark-50 dark:hover:bg-bark-600 transition-colors text-sm font-medium text-bark-800 dark:text-bark-100"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 21 21">
+                <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+              </svg>
+              Sign in with Microsoft
+            </button>
           </div>
-
-          {loading && (
-            <p className="text-sm text-bark-500 dark:text-bark-400 text-center mt-4">Signing in...</p>
-          )}
 
           {error && (
             <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 px-3 py-2 mt-4">

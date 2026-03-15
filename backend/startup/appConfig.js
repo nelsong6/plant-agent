@@ -38,8 +38,8 @@ export async function fetchAppConfig() {
     ]);
 
   // App Configuration: shared OAuth values (unprefixed)
-  const googleClientIdSetting = await appConfigClient.getConfigurationSetting({
-    key: 'google_oauth_client_id_plain',
+  const microsoftClientIdSetting = await appConfigClient.getConfigurationSetting({
+    key: 'microsoft_oauth_client_id_plain',
   });
 
   // Key Vault: per-app secrets
@@ -55,10 +55,10 @@ export async function fetchAppConfig() {
     storageAccountEndpoint: storageEndpointSetting.value,
     jwtSigningSecret,
     anthropicApiKey,
-    googleClientId: googleClientIdSetting.value,
+    microsoftClientId: microsoftClientIdSetting.value,
   };
 
-  const required = ['cosmosDbEndpoint', 'storageAccountEndpoint', 'jwtSigningSecret', 'googleClientId'];
+  const required = ['cosmosDbEndpoint', 'storageAccountEndpoint', 'jwtSigningSecret', 'microsoftClientId'];
   for (const key of required) {
     if (!config[key]) {
       throw new Error(`Configuration value "${key}" is missing or empty.`);

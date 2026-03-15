@@ -1,0 +1,91 @@
+import { Router } from 'express';
+import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
+
+const ALLOWED_EMAIL = 'fullnelsongrip@gmail.com';
+
+const client = jwksClient({
+  jwksUri: 'https://login.microsoftonline.com/common/discovery/v2.0/keys',
+  cache: true,
+  rateLimit: true,
+});
+
+function getSigningKey(header) {
+  return new Promise((resolve, reject) => {
+    client.getSigningKey(header.kid, (err, key) => {
+      if (err) return reject(err);
+      resolve(key.getPublicKey());
+    });
+  });
+}
+
+function verifyMicrosoftToken(idToken, audience) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      idToken,
+      (header, callback) => {
+        getSigningKey(header).then((key) => callback(null, key)).catch(callback);
+      },
+      { audience, issuer: /^https:\/\/login\.microsoftonline\.com\/.*\/v2\.0$/ },
+      (err, decoded) => {
+        if (err) return reject(err);
+        resolve(decoded);
+      },
+    );
+  });
+}
+
+/**
+ * Microsoft OAuth auth routes.
+ *
+ * POST /auth/microsoft/login – verify Microsoft ID token, issue app JWT
+ */
+export function createMicrosoftRoutes({ jwtSecret, microsoftClientId, container }) {
+  const router = Router();
+
+  function issueToken(user) {
+    return jwt.sign(
+      { sub: user.id, email: user.email, name: user.name, role: user.role },
+      jwtSecret,
+      { expiresIn: '7d' },
+    );
+  }
+
+  router.post('/auth/microsoft/login', async (req, res) => {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'credential required' });
+    }
+
+    try {
+      const payload = await verifyMicrosoftToken(credential, microsoftClientId);
+      const email = payload.email || payload.preferred_username;
+
+      if (email !== ALLOWED_EMAIL) {
+        return res.status(403).json({ error: 'Unauthorized account' });
+      }
+
+      const id = `microsoft|${payload.sub}`;
+      const account = {
+        id,
+        userId: id,
+        type: 'account',
+        provider: 'microsoft',
+        name: payload.name,
+        email,
+        role: 'admin',
+        updatedAt: new Date().toISOString(),
+      };
+
+      await container.items.upsert(account);
+
+      const token = issueToken(account);
+      res.json({ token, user: { id, name: account.name, email: account.email, role: account.role } });
+    } catch (error) {
+      console.error('Microsoft auth error:', error);
+      res.status(401).json({ error: 'Invalid Microsoft credential' });
+    }
+  });
+
+  return router;
+}
