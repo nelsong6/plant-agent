@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import type { Photo } from '../../hooks/usePhotos';
 import { EmptyState } from '../ui/EmptyState';
 import { Skeleton } from '../ui/Skeleton';
+import { PhotoLightbox } from '../ui/PhotoLightbox';
 
 interface Props {
   photos: Photo[];
@@ -37,6 +39,8 @@ export function PhotoTimeline({ photos, loading }: Props) {
     );
   }
 
+  const [selectedPhoto, setSelectedPhoto] = useState<{ src: string; alt: string } | null>(null);
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {photos.map((photo) => (
@@ -44,13 +48,21 @@ export function PhotoTimeline({ photos, loading }: Props) {
           <img
             src={photo.url}
             alt={photo.name}
-            className="w-full aspect-square object-cover rounded-lg"
+            className="w-full aspect-square object-cover rounded-lg cursor-pointer"
+            onClick={() => setSelectedPhoto({ src: photo.url, alt: photo.name })}
           />
           <span className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[11px] px-1.5 py-0.5 rounded">
             {new Date(photo.createdAt).toLocaleDateString()}
           </span>
         </div>
       ))}
+
+      <PhotoLightbox
+        open={selectedPhoto !== null}
+        src={selectedPhoto?.src ?? ''}
+        alt={selectedPhoto?.alt ?? ''}
+        onClose={() => setSelectedPhoto(null)}
+      />
     </div>
   );
 }

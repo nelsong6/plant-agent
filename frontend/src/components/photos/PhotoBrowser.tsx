@@ -8,6 +8,7 @@ import { Card } from '../ui/Card';
 import { PageHeader } from '../ui/PageHeader';
 import { EmptyState } from '../ui/EmptyState';
 import { Skeleton } from '../ui/Skeleton';
+import { PhotoLightbox } from '../ui/PhotoLightbox';
 
 interface PlantPhotos {
   plant: Plant;
@@ -27,6 +28,7 @@ export function PhotoBrowser() {
   const [plantPhotos, setPlantPhotos] = useState<PlantPhotos[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const [selectedPhoto, setSelectedPhoto] = useState<{ src: string; alt: string } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -117,13 +119,21 @@ export function PhotoBrowser() {
                 <img
                   src={photo.url}
                   alt={photo.name}
-                  className="w-full aspect-square object-cover"
+                  className="w-full aspect-square object-cover cursor-pointer"
+                  onClick={() => setSelectedPhoto({ src: photo.url, alt: photo.name })}
                 />
               </Card>
             ))}
           </div>
         </div>
       ))}
+
+      <PhotoLightbox
+        open={selectedPhoto !== null}
+        src={selectedPhoto?.src ?? ''}
+        alt={selectedPhoto?.alt ?? ''}
+        onClose={() => setSelectedPhoto(null)}
+      />
     </div>
   );
 }

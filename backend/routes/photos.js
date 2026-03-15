@@ -71,6 +71,14 @@ export function createPhotoRoutes({ requireAuth, storageAccountEndpoint, plantsC
       });
 
       const url = `${storageAccountEndpoint}${CONTAINER}/${blobName}`;
+
+      // Set as plant thumbnail if not already set
+      if (!plant.thumbnailUrl) {
+        plant.thumbnailUrl = url;
+        plant.updatedAt = new Date().toISOString();
+        await plantsContainer.items.upsert(plant);
+      }
+
       res.status(201).json({ url, name: blobName });
     } catch (error) {
       console.error('Error uploading photo:', error);

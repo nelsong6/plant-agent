@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { API_BASE } from '../../api/client';
+import { useChats } from '../../hooks/useChats';
+import type { Chat } from '../../types';
 import { Button } from '../ui/Button';
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
 
 interface Props {
   plantId: string;
@@ -20,39 +18,70 @@ function StreamingDots() {
   );
 }
 
+function ChatBubble({ role, content }: { role: 'user' | 'assistant'; content: string }) {
+  return (
+    <div className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div
+        className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+          role === 'user'
+            ? 'bg-leaf-500 text-white rounded-2xl rounded-br-sm'
+            : 'bg-bark-100 dark:bg-bark-700 text-bark-800 dark:text-bark-100 rounded-2xl rounded-bl-sm'
+        }`}
+      >
+        {content}
+      </div>
+    </div>
+  );
+}
+
+function ChatHistory({ chats }: { chats: Chat[] }) {
+  if (chats.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      {chats.map((chat) => (
+        <div key={chat.id} className="space-y-2">
+          <p className="text-xs text-bark-400 dark:text-bark-500">
+            {new Date(chat.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+            {' · '}
+            {new Date(chat.createdAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+          </p>
+          <ChatBubble role="user" content={chat.userMessage} />
+          <ChatBubble role="assistant" content={chat.assistantMessage} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ChatPanel({ plantId }: Props) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { chats, loading: chatsLoading, addChat } = useChats(plantId);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [activeResponse, setActiveResponse] = useState<{ userMessage: string; assistantMessage: string } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeResponse?.assistantMessage, chats]);
 
   async function handleSend() {
     const text = input.trim();
     if (!text || streaming) return;
 
-    const userMsg: Message = { role: 'user', content: text };
-    setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setStreaming(true);
-
-    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+    setActiveResponse({ userMessage: text, assistantMessage: '' });
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/plants/${plantId}/chat`, {
+      const res = await fetch(`${API_BASE}/api/plants/${plantId}/chats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          message: text,
-          history: messages,
-        }),
+        body: JSON.stringify({ message: text }),
       });
 
       if (!res.ok) {
@@ -79,61 +108,57 @@ export function ChatPanel({ plantId }: Props) {
           const data = JSON.parse(line.slice(6));
 
           if (data.type === 'text') {
-            setMessages((prev) => {
-              const updated = [...prev];
-              const last = updated[updated.length - 1];
-              updated[updated.length - 1] = { ...last, content: last.content + data.text };
-              return updated;
-            });
+            setActiveResponse((prev) =>
+              prev ? { ...prev, assistantMessage: prev.assistantMessage + data.text } : prev
+            );
+          } else if (data.type === 'done' && data.chat) {
+            addChat(data.chat as Chat);
           } else if (data.type === 'error') {
-            setMessages((prev) => {
-              const updated = [...prev];
-              updated[updated.length - 1] = { role: 'assistant', content: `Error: ${data.error}` };
-              return updated;
-            });
+            setActiveResponse((prev) =>
+              prev ? { ...prev, assistantMessage: `Error: ${data.error}` } : prev
+            );
           }
         }
       }
     } catch (e) {
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          role: 'assistant',
-          content: `Error: ${e instanceof Error ? e.message : 'Chat failed'}`,
-        };
-        return updated;
-      });
+      setActiveResponse((prev) =>
+        prev ? { ...prev, assistantMessage: `Error: ${e instanceof Error ? e.message : 'Chat failed'}` } : prev
+      );
     } finally {
       setStreaming(false);
+      setActiveResponse(null);
     }
   }
 
   return (
     <div className="border border-bark-100 dark:border-bark-700 rounded-xl overflow-hidden">
-      {/* Messages */}
-      <div className="h-80 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 && (
+      {/* Chat history + active response */}
+      <div className="h-80 overflow-y-auto p-4 space-y-4">
+        {chatsLoading ? (
+          <p className="text-bark-400 text-center mt-20 text-sm">Loading chats...</p>
+        ) : chats.length === 0 && !activeResponse ? (
           <p className="text-bark-400 text-center mt-20 text-sm">
             Ask a question about this plant...
           </p>
+        ) : (
+          <>
+            {/* Saved chats (newest first — reverse so oldest appears at top) */}
+            <ChatHistory chats={[...chats].reverse()} />
+
+            {/* Active streaming response */}
+            {activeResponse && (
+              <div className="space-y-2">
+                <ChatBubble role="user" content={activeResponse.userMessage} />
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap bg-bark-100 dark:bg-bark-700 text-bark-800 dark:text-bark-100 rounded-2xl rounded-bl-sm">
+                    {activeResponse.assistantMessage || <StreamingDots />}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[80%] px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
-                msg.role === 'user'
-                  ? 'bg-leaf-500 text-white rounded-2xl rounded-br-sm'
-                  : 'bg-bark-100 dark:bg-bark-700 text-bark-800 dark:text-bark-100 rounded-2xl rounded-bl-sm'
-              }`}
-            >
-              {msg.content || (streaming && i === messages.length - 1 ? <StreamingDots /> : '')}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
+        <div ref={scrollRef} />
       </div>
 
       {/* Input */}

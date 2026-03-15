@@ -49,6 +49,7 @@ async function startServer() {
   const plantsContainer = database.container('plants');
   const eventsContainer = database.container('events');
   const analysesContainer = database.container('analyses');
+  const chatsContainer = database.container('chats');
   console.log('Connected to Cosmos DB');
 
   // Auth routes
@@ -66,7 +67,7 @@ async function startServer() {
   app.use(createCaptureRoutes({ requireAuth }));
   app.use(createAnalysisRoutes({ analysesContainer, requireAuth }));
   app.use(createTaskRoutes({ plantsContainer, eventsContainer, requireAuth }));
-  app.use(createChatRoutes({ plantsContainer, eventsContainer, requireAuth, anthropicApiKey: config.anthropicApiKey }));
+  app.use(createChatRoutes({ plantsContainer, eventsContainer, chatsContainer, requireAuth, anthropicApiKey: config.anthropicApiKey, storageAccountEndpoint: config.storageAccountEndpoint }));
 
   // 404
   app.use((req, res) => {

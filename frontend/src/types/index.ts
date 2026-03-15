@@ -8,6 +8,7 @@ export interface Plant {
   notes: string;
   claudeNotes: string;
   createdAt: string;
+  thumbnailUrl?: string;
   updatedAt: string;
 }
 
@@ -47,6 +48,15 @@ export interface Task {
   action: string;
   daysSinceLast: number;
   urgency: 'low' | 'medium' | 'high';
+}
+
+export interface Chat {
+  id: string;
+  plantId: string;
+  userMessage: string;
+  assistantMessage: string;
+  userId: string;
+  createdAt: string;
 }
 
 export interface User {

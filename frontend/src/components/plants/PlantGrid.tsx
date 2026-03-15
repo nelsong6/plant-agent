@@ -102,8 +102,12 @@ export function PlantGrid() {
             {roomPlants.map((plant) => (
               <Link key={plant.id} to={`/plants/${plant.id}`} className="no-underline text-inherit">
                 <Card hover>
-                  <div className="h-32 bg-leaf-50 dark:bg-leaf-900/30 flex items-center justify-center">
-                    <LeafIcon className="w-10 h-10 text-leaf-300" />
+                  <div className="h-32 bg-leaf-50 dark:bg-leaf-900/30 flex items-center justify-center overflow-hidden">
+                    {plant.thumbnailUrl ? (
+                      <img src={plant.thumbnailUrl} alt={plant.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <LeafIcon className="w-10 h-10 text-leaf-300" />
+                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="font-medium text-bark-900 dark:text-bark-50">{plant.name}</h3>

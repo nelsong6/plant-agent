@@ -92,6 +92,10 @@ export function createPlantRoutes({ plantsContainer, requireAuth, anthropicApiKe
         photoMediaType = contentType;
       }
 
+      if (photoUrl) {
+        plant.thumbnailUrl = photoUrl;
+      }
+
       // Enrich with Claude — use vision if photo available, otherwise name-only
       if (anthropicApiKey && plant.name) {
         const enrichment = await enrichPlantWithClaude(anthropicApiKey, plant.name, photoBase64, photoMediaType);
