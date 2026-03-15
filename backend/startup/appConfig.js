@@ -30,19 +30,23 @@ export async function fetchAppConfig() {
   const appConfigClient = new AppConfigurationClient(appConfigEndpoint, credential);
   const kvClient = new SecretClient(keyVaultUrl, credential);
 
-  // App Configuration: per-app values
+  // App Configuration: per-app values (prefixed)
   const [cosmosEndpointSetting, storageEndpointSetting] =
     await Promise.all([
       appConfigClient.getConfigurationSetting({ key: `${prefix}/cosmos_db_endpoint` }),
       appConfigClient.getConfigurationSetting({ key: `${prefix}/storage_account_endpoint` }),
     ]);
 
+  // App Configuration: shared OAuth values (unprefixed)
+  const googleClientIdSetting = await appConfigClient.getConfigurationSetting({
+    key: 'google_oauth_client_id_plain',
+  });
+
   // Key Vault: per-app secrets
-  const [jwtSigningSecret, anthropicApiKey, googleClientId] = (
+  const [jwtSigningSecret, anthropicApiKey] = (
     await Promise.all([
       kvClient.getSecret('plant-agent-jwt-signing-secret'),
       kvClient.getSecret('plant-agent-anthropic-api-key').catch(() => ({ value: null })),
-      kvClient.getSecret('plant-agent-google-client-id'),
     ])
   ).map((s) => s.value);
 
@@ -51,7 +55,7 @@ export async function fetchAppConfig() {
     storageAccountEndpoint: storageEndpointSetting.value,
     jwtSigningSecret,
     anthropicApiKey,
-    googleClientId,
+    googleClientId: googleClientIdSetting.value,
   };
 
   const required = ['cosmosDbEndpoint', 'storageAccountEndpoint', 'jwtSigningSecret', 'googleClientId'];
