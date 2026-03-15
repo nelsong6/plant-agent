@@ -9,3 +9,10 @@ export const msalInstance = new PublicClientApplication({
 });
 
 export const msalReady = msalInstance.initialize();
+
+export async function loginWithMicrosoft() {
+  await msalReady;
+  await msalInstance.loginRedirect({
+    scopes: ['openid', 'profile', 'email'],
+  });
+}

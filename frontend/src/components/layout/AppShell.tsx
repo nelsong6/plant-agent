@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
+import { loginWithMicrosoft } from '../../auth/msal';
 import { useTheme } from '../../theme/ThemeContext';
 
 const navLinks = [
@@ -86,9 +87,9 @@ export function AppShell() {
                   </button>
                 </>
               ) : (
-                <Link to="/login" className="text-sm font-medium text-leaf-600 hover:text-leaf-700 transition-colors">
+                <button onClick={loginWithMicrosoft} className="text-sm font-medium text-leaf-600 hover:text-leaf-700 transition-colors">
                   Sign In
-                </Link>
+                </button>
               )}
 
               {/* Mobile hamburger */}

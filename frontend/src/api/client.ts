@@ -17,7 +17,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
     localStorage.removeItem('token');
     // Only redirect for authenticated actions, not public reads
     if (options.method && options.method !== 'GET') {
-      window.location.href = '/login';
+      import('../auth/msal').then(({ loginWithMicrosoft }) => loginWithMicrosoft());
     }
     throw new Error('Unauthorized');
   }
