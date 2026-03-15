@@ -4,6 +4,19 @@ import { msalInstance, msalReady } from './msal';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
+/** Retry fetch up to `retries` times with exponential backoff (handles cold-start timeouts). */
+async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (i === retries) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
+    }
+  }
+  throw new Error('unreachable');
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -43,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response?.idToken) {
         try {
-          const res = await fetch(`${API_BASE}/auth/microsoft/login`, {
+          const res = await fetchWithRetry(`${API_BASE}/auth/microsoft/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ credential: response.idToken }),
@@ -57,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setSession(data.token, data.user);
           }
         } catch (err) {
-          setAuthError(`Login failed: ${err instanceof Error ? err.message : String(err)}`);
+          setAuthError(`Login failed: ${err instanceof Error ? err.message : String(err)} (API: ${API_BASE})`);
         }
       } else if (!token) {
         // MSAL redirected back but no idToken — may indicate a silent failure
