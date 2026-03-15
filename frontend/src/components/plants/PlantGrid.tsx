@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext';
 import { usePlants } from '../../hooks/usePlants';
 import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 import { PageHeader } from '../ui/PageHeader';
 import { SkeletonCard } from '../ui/Skeleton';
 import { EmptyState } from '../ui/EmptyState';
 import { ErrorBanner } from '../ui/ErrorBanner';
+import { AddPlantForm } from './AddPlantForm';
 
 function LeafIcon({ className }: { className?: string }) {
   return (
@@ -17,12 +21,21 @@ function LeafIcon({ className }: { className?: string }) {
 }
 
 export function PlantGrid() {
-  const { plants, loading, error } = usePlants();
+  const { plants, loading, error, refetch } = usePlants();
+  const { isAdmin } = useAuth();
+  const [showForm, setShowForm] = useState(false);
+
+  const existingRooms = [...new Set(plants.map((p) => p.room).filter(Boolean))];
+  const addButton = isAdmin ? (
+    <Button size="sm" onClick={() => setShowForm((f) => !f)}>
+      + Add Plant
+    </Button>
+  ) : undefined;
 
   if (loading) {
     return (
       <div>
-        <PageHeader title="My Plants" />
+        <PageHeader title="My Plants" action={addButton} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 6 }, (_, i) => <SkeletonCard key={i} />)}
         </div>
@@ -33,7 +46,14 @@ export function PlantGrid() {
   if (error) {
     return (
       <div>
-        <PageHeader title="My Plants" />
+        <PageHeader title="My Plants" action={addButton} />
+        {showForm && (
+          <AddPlantForm
+            existingRooms={existingRooms}
+            onCreated={() => { refetch(); setShowForm(false); }}
+            onCancel={() => setShowForm(false)}
+          />
+        )}
         <ErrorBanner message={error} />
       </div>
     );
@@ -42,12 +62,20 @@ export function PlantGrid() {
   if (plants.length === 0) {
     return (
       <div>
-        <PageHeader title="My Plants" />
-        <EmptyState
-          icon={<LeafIcon className="w-12 h-12" />}
-          title="No plants yet"
-          description="Add your first plant to get started."
-        />
+        <PageHeader title="My Plants" action={addButton} />
+        {showForm ? (
+          <AddPlantForm
+            existingRooms={existingRooms}
+            onCreated={() => { refetch(); setShowForm(false); }}
+            onCancel={() => setShowForm(false)}
+          />
+        ) : (
+          <EmptyState
+            icon={<LeafIcon className="w-12 h-12" />}
+            title="No plants yet"
+            description="Add your first plant to get started."
+          />
+        )}
       </div>
     );
   }
@@ -61,7 +89,14 @@ export function PlantGrid() {
 
   return (
     <div>
-      <PageHeader title="My Plants" count={plants.length} />
+      <PageHeader title="My Plants" count={plants.length} action={addButton} />
+      {showForm && (
+        <AddPlantForm
+          existingRooms={existingRooms}
+          onCreated={() => { refetch(); setShowForm(false); }}
+          onCancel={() => setShowForm(false)}
+        />
+      )}
       {[...rooms.entries()].map(([room, roomPlants]) => (
         <div key={room} className="mb-8">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-bark-500 dark:text-bark-400 mb-3">
