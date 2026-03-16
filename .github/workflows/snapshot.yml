@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 env:
   STATIC_WEB_APP_NAME: plant-agent-app
@@ -52,6 +52,14 @@ jobs:
           COSMOS_DB_DATABASE_NAME: ${{ fromJSON(needs.tofu-outputs.outputs.outputs_json).cosmos_db_database_name }}
           STORAGE_ACCOUNT_ENDPOINT: ${{ fromJSON(needs.tofu-outputs.outputs.outputs_json).storage_account_endpoint }}
         run: node generate-snapshot.js --output ../frontend/public/snapshot.db
+
+      - name: Commit snapshot.db to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/snapshot.db
+          git diff --cached --quiet || git commit -m "Update snapshot.db"
+          git push
 
       - name: Install frontend dependencies
         working-directory: ./frontend
