@@ -62,7 +62,9 @@ jobs:
           COSMOS_DB_ENDPOINT: ${{ steps.cosmos.outputs.endpoint }}
           COSMOS_DB_DATABASE_NAME: ${{ fromJSON(needs.tofu-outputs.outputs.outputs_json).cosmos_db_database_name }}
           STORAGE_ACCOUNT_ENDPOINT: ${{ fromJSON(needs.tofu-outputs.outputs.outputs_json).storage_account_endpoint }}
-        run: node generate-snapshot.js --output ../frontend/public/snapshot.db
+        run: |
+          rm -f ../frontend/public/snapshot.db
+          node generate-snapshot.js --output ../frontend/public/snapshot.db
 
       - name: Commit snapshot.db to repo
         run: |
