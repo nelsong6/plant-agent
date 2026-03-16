@@ -42,7 +42,11 @@ async function loadSnapshot(): Promise<Database | null> {
   if (!response.ok) return null;
 
   const buffer = await response.arrayBuffer();
-  return new SQL.Database(new Uint8Array(buffer));
+  const db = new SQL.Database(new Uint8Array(buffer));
+
+  // Validate the file is a real SQLite database (not HTML from SWA fallback)
+  db.exec('SELECT 1 FROM snapshot_meta LIMIT 1');
+  return db;
 }
 
 export function SnapshotProvider({ children }: { children: ReactNode }) {
