@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
+import { SnapshotProvider } from './api/snapshotContext';
 import { ThemeProvider } from './theme/ThemeContext';
 import { AppShell } from './components/layout/AppShell';
 import { PlantGrid } from './components/plants/PlantGrid';
@@ -25,7 +26,9 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <AppRoutes />
+          <SnapshotProvider>
+            <AppRoutes />
+          </SnapshotProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

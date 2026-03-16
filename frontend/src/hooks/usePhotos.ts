@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiFetch } from '../api/client';
+import { useDataSource } from '../api/snapshotContext';
 
 export interface Photo {
   url: string;
@@ -10,14 +10,16 @@ export interface Photo {
 export function usePhotos(plantId: string) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const { fetchPhotos, isReady } = useDataSource();
 
   useEffect(() => {
+    if (!isReady) return;
     setLoading(true);
-    apiFetch<Photo[]>(`/api/plants/${plantId}/photos`)
+    fetchPhotos(plantId)
       .then(setPhotos)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [plantId]);
+  }, [plantId, isReady]);
 
   return { photos, loading };
 }

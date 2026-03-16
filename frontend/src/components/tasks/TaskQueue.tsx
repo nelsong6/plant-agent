@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Task } from '../../types';
-import { apiFetch } from '../../api/client';
+import { useDataSource } from '../../api/snapshotContext';
 import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
 import { PageHeader } from '../ui/PageHeader';
@@ -33,13 +33,15 @@ function CheckIcon({ className }: { className?: string }) {
 export function TaskQueue() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const { fetchTasks, isReady } = useDataSource();
 
   useEffect(() => {
-    apiFetch<Task[]>('/api/tasks')
+    if (!isReady) return;
+    fetchTasks()
       .then(setTasks)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [isReady]);
 
   if (loading) {
     return (

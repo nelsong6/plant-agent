@@ -18,6 +18,11 @@ output "cosmos_db_database_name" {
   description = "Cosmos DB database name"
 }
 
+output "cosmos_db_endpoint" {
+  value       = "https://${local.infra.cosmos_db_account_name}.documents.azure.com:443/"
+  description = "Cosmos DB endpoint URL"
+}
+
 output "backend_api_url" {
   value       = "https://${local.back_app_dns_name}.${local.infra.dns_zone_name}"
   description = "The URL of the backend Container App API"

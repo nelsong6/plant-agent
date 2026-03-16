@@ -2,5 +2,9 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/assets/*", "/api/*"]
+  },
+  "mimeTypes": {
+    ".db": "application/octet-stream",
+    ".wasm": "application/wasm"
   }
 }

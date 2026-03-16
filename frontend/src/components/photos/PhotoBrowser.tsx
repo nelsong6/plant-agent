@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Plant } from '../../types';
 import type { Photo } from '../../hooks/usePhotos';
-import { fetchPlants } from '../../api/plants';
-import { apiFetch } from '../../api/client';
+import { useDataSource } from '../../api/snapshotContext';
 import { Card } from '../ui/Card';
 import { PageHeader } from '../ui/PageHeader';
 import { EmptyState } from '../ui/EmptyState';
@@ -29,14 +28,16 @@ export function PhotoBrowser() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const [selectedPhoto, setSelectedPhoto] = useState<{ src: string; alt: string } | null>(null);
+  const { fetchPlants, fetchPhotos, isReady } = useDataSource();
 
   useEffect(() => {
+    if (!isReady) return;
     async function load() {
       try {
         const plants = await fetchPlants();
         const results = await Promise.all(
           plants.map(async (plant) => {
-            const photos = await apiFetch<Photo[]>(`/api/plants/${plant.id}/photos`);
+            const photos = await fetchPhotos(plant.id);
             return { plant, photos };
           }),
         );
@@ -48,7 +49,7 @@ export function PhotoBrowser() {
       }
     }
     load();
-  }, []);
+  }, [isReady]);
 
   if (loading) {
     return (

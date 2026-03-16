@@ -1,0 +1,16 @@
+{
+  "name": "plant-agent-snapshot",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate-snapshot.js"
+  },
+  "dependencies": {
+    "@azure/app-configuration": "^1.8.0",
+    "@azure/cosmos": "^4.0.0",
+    "@azure/identity": "^4.0.0",
+    "@azure/storage-blob": "^12.25.0",
+    "better-sqlite3": "^11.0.0"
+  }
+}

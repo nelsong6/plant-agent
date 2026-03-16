@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { PlantEvent } from '../types';
-import { fetchEvents, logEvent } from '../api/events';
+import { logEvent } from '../api/events';
+import { useDataSource } from '../api/snapshotContext';
 
 export function useEvents(plantId: string) {
   const [events, setEvents] = useState<PlantEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const { fetchEvents, isReady } = useDataSource();
 
   const load = useCallback(() => {
+    if (!isReady) return;
     setLoading(true);
     fetchEvents(plantId)
       .then(setEvents)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [plantId]);
+  }, [plantId, isReady]);
 
   useEffect(load, [load]);
 

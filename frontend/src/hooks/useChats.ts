@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Chat } from '../types';
-import { fetchChats } from '../api/chats';
+import { useDataSource } from '../api/snapshotContext';
 
 export function useChats(plantId: string) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const { fetchChats, isReady } = useDataSource();
 
   const load = useCallback(() => {
+    if (!isReady) return;
     setLoading(true);
     fetchChats(plantId)
       .then(setChats)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [plantId]);
+  }, [plantId, isReady]);
 
   useEffect(load, [load]);
 

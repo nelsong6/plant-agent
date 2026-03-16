@@ -6,7 +6,12 @@ frontend/node_modules/
 frontend/dist/
 frontend/.env
 frontend/.env.local
+frontend/public/snapshot.db
+frontend/public/sql-wasm.wasm
 *.tsbuildinfo
+
+# Snapshot
+snapshot/node_modules/
 
 # Backend
 backend/node_modules/
