@@ -21,7 +21,9 @@ All files are parametric OpenSCAD — key dimensions (wall thickness, tolerances
 | `lib/pi5.scad` | Raspberry Pi 5 board model and dimensions |
 | `lib/arducam_b0283.scad` | Arducam B0283 bracket model and dimensions |
 | `lib/common.scad` | Shared utility modules |
+| `enclosure_cadquery.py` | CadQuery script — generates STEP files |
 | `stl/` | Pre-exported STL files (when available) |
+| `step/` | Pre-exported STEP files (B-Rep solids) |
 
 ## Print Settings
 
@@ -77,3 +79,24 @@ The bracket dimensions in `lib/arducam_b0283.scad` are approximate. **Measure yo
 2. Press F6 to render
 3. File > Export > Export as STL → save to `stl/base.stl`
 4. Repeat for `top.scad` → `stl/top.stl`
+
+## Exporting STEP Files
+
+STEP files (B-Rep solids) are generated via a CadQuery Python script that mirrors the OpenSCAD design.
+
+### Prerequisites
+
+```bash
+pip install cadquery
+```
+
+### Generate STEP files
+
+```bash
+cd enclosure
+python enclosure_cadquery.py              # exports base.step, top.step, assembly.step
+python enclosure_cadquery.py --part base  # export only base
+python enclosure_cadquery.py --part top   # export only top
+```
+
+Output goes to `step/` by default. Override with `--output-dir <path>`.
