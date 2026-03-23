@@ -1,6 +1,6 @@
 {
   "name": "@nelsong6/plant-agent-routes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Plant monitoring route handlers for the shared API",
   "main": "index.js",
