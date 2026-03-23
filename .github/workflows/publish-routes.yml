@@ -31,7 +31,7 @@ jobs:
       - name: Trigger API rebuild
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DISPATCH_TOKEN }}
           repository: nelsong6/api
           event-type: dependency-updated
           client-payload: '{"package": "@nelsong6/plant-agent-routes"}'
