@@ -1,10 +1,9 @@
-name: Deploy
+name: Deploy Frontend
 
 on:
-  workflow_run:
-    workflows: ["Phase 1 - CI Build"]
+  push:
     branches: [main]
-    types: [completed]
+    paths: ["frontend/**"]
   workflow_dispatch:
 
 permissions:
@@ -14,39 +13,14 @@ permissions:
 env:
   STATIC_WEB_APP_NAME: plant-agent-app
   RESOURCE_GROUP_NAME: plant-agent-rg
-  CONTAINER_APP_NAME: plant-agent-api
-  REGISTRY: ghcr.io
-  IMAGE_NAME: nelsong6/plant-agent/plant-agent-api
-  TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
 jobs:
-  deploy-backend:
-    name: Deploy Backend API
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Azure Login via OIDC
-        uses: azure/login@v2
-        with:
-          client-id: ${{ vars.ARM_CLIENT_ID }}
-          tenant-id: ${{ vars.ARM_TENANT_ID }}
-          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
-
-      - name: Deploy to Container App
-        run: |
-          az containerapp update \
-            --name ${{ env.CONTAINER_APP_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP_NAME }} \
-            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TARGET_SHA }}
-
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: ${{ env.TARGET_SHA }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

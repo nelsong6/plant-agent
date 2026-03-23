@@ -23,21 +23,6 @@ output "cosmos_db_endpoint" {
   description = "Cosmos DB endpoint URL"
 }
 
-output "backend_api_url" {
-  value       = "https://${local.back_app_dns_name}.${local.infra.dns_zone_name}"
-  description = "The URL of the backend Container App API"
-}
-
-output "container_app_name" {
-  value       = azurerm_container_app.plant_agent_api["plant-agent-api"].name
-  description = "Name of the backend Container App"
-}
-
-output "container_app_default_fqdn" {
-  value       = azurerm_container_app.plant_agent_api["plant-agent-api"].ingress[0].fqdn
-  description = "Default Azure-assigned FQDN for the backend Container App"
-}
-
 output "storage_account_name" {
   value       = azurerm_storage_account.plant_photos.name
   description = "Name of the plant photos storage account"

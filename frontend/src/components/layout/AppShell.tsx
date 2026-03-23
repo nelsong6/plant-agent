@@ -3,11 +3,13 @@ import { Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { loginWithMicrosoft } from '../../auth/msal';
 import { useTheme } from '../../theme/ThemeContext';
+import { usePushSubscription } from '../../hooks/usePushSubscription';
 import { TabBar } from './TabBar';
 
 export function AppShell() {
   const { user, isAdmin, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { supported: pushSupported, subscribed: pushSubscribed, loading: pushLoading, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushSubscription();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -42,6 +44,27 @@ export function AppShell() {
 
           {/* Right section (hidden on mobile, shown md+) */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Push notification toggle */}
+            {isAdmin && pushSupported && (
+              <button
+                onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
+                disabled={pushLoading}
+                className="p-1.5 rounded-md text-bark-500 dark:text-bark-400 hover:bg-bark-100 dark:hover:bg-bark-700 transition-colors disabled:opacity-50"
+                aria-label={pushSubscribed ? 'Disable notifications' : 'Enable notifications'}
+              >
+                {pushSubscribed ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" />
+                  </svg>
+                )}
+              </button>
+            )}
+
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
@@ -111,6 +134,25 @@ export function AppShell() {
             ))}
             {/* Mobile auth/theme row */}
             <div className="flex items-center gap-3 pt-2 border-t border-bark-100 dark:border-bark-700">
+              {isAdmin && pushSupported && (
+                <button
+                  onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
+                  disabled={pushLoading}
+                  className="p-1.5 rounded-md text-bark-500 dark:text-bark-400 hover:bg-bark-100 dark:hover:bg-bark-700 transition-colors disabled:opacity-50"
+                  aria-label={pushSubscribed ? 'Disable notifications' : 'Enable notifications'}
+                >
+                  {pushSubscribed ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                      <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" />
+                    </svg>
+                  )}
+                </button>
+              )}
               <button
                 onClick={toggleTheme}
                 className="p-1.5 rounded-md text-bark-500 dark:text-bark-400 hover:bg-bark-100 dark:hover:bg-bark-700 transition-colors"

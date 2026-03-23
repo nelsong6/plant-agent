@@ -1,7 +1,7 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/api/*", "/snapshot.db", "/sql-wasm.wasm"]
+    "exclude": ["/assets/*", "/api/*", "/snapshot.db", "/sql-wasm.wasm", "/sw.js", "/manifest.json"]
   },
   "mimeTypes": {
     ".db": "application/octet-stream",

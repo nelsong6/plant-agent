@@ -1,0 +1,39 @@
+name: Daily Plant Notifications
+
+on:
+  schedule:
+    - cron: '0 14 * * *' # 2pm UTC (~10am ET)
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+
+jobs:
+  notify:
+    name: Dispatch Push Notifications
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.ARM_CLIENT_ID }}
+          tenant-id: ${{ vars.ARM_TENANT_ID }}
+          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
+
+      - name: Fetch notify API key from Key Vault
+        id: secrets
+        run: |
+          KEY=$(az keyvault secret show \
+            --vault-name romaine-kv \
+            --name plant-agent-notify-api-key \
+            --query value -o tsv)
+          echo "::add-mask::$KEY"
+          echo "api_key=$KEY" >> $GITHUB_OUTPUT
+
+      - name: Dispatch notifications
+        run: |
+          RESPONSE=$(curl -sf -X POST \
+            https://api.romaine.life/plant/api/notifications/dispatch \
+            -H "X-API-Key: ${{ steps.secrets.outputs.api_key }}" \
+            -H "Content-Type: application/json")
+          echo "$RESPONSE" | jq .

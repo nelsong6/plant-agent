@@ -73,6 +73,22 @@ resource "azurerm_cosmosdb_sql_container" "chats" {
   }
 }
 
+resource "azurerm_cosmosdb_sql_container" "push_subscriptions" {
+  name                = "push-subscriptions"
+  resource_group_name = local.infra.resource_group_name
+  account_name        = local.infra.cosmos_db_account_name
+  database_name       = azurerm_cosmosdb_sql_database.plant_agent.name
+  partition_key_paths = ["/userId"]
+
+  indexing_policy {
+    indexing_mode = "consistent"
+
+    included_path {
+      path = "/*"
+    }
+  }
+}
+
 resource "azurerm_cosmosdb_sql_container" "rooms" {
   name                = "rooms"
   resource_group_name = local.infra.resource_group_name
