@@ -56,7 +56,7 @@ jobs:
       - name: Install and Build Frontend
         working-directory: frontend
         env:
-          VITE_API_BASE: https://plants.api.romaine.life
+          VITE_API_BASE: https://api.romaine.life/plant
           VITE_MICROSOFT_CLIENT_ID: ${{ vars.MICROSOFT_CLIENT_ID }}
         run: |
           npm ci
