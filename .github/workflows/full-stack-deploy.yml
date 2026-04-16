@@ -27,6 +27,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Generate version.json
+        run: |
+          mkdir -p frontend/public
+          echo "{\"sha\":\"${GITHUB_SHA::7}\",\"deployedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > frontend/public/version.json
+
       - name: Install and Build Frontend
         working-directory: frontend
         env:
