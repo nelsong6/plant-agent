@@ -11,4 +11,4 @@ resources:
 images:
 - name: romainecr.azurecr.io/plant-agent
   newName: romainecr.azurecr.io/plant-agent
-  newTag: "9144664"
+  newTag: 7f2e76d
