@@ -15,7 +15,6 @@ on:
 permissions:
   id-token: write
   contents: write
-  packages: read
 
 concurrency:
   group: build-and-deploy
@@ -54,7 +53,6 @@ jobs:
           TAG="${GITHUB_SHA::7}"
           IMAGE="romainecr.azurecr.io/plant-agent:${TAG}"
           docker build \
-            --build-arg NPM_TOKEN=${{ secrets.GITHUB_TOKEN }} \
             --build-arg VITE_MICROSOFT_CLIENT_ID="${MICROSOFT_CLIENT_ID}" \
             -t "$IMAGE" .
           docker push "$IMAGE"

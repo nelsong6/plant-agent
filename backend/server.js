@@ -20,7 +20,7 @@ import {
   createChatRoutes,
   createPushRoutes,
   createNotifyRoutes,
-} from '@nelsong6/plant-agent-routes';
+} from './routes/index.js';
 import { createRequireAuth } from './auth.js';
 import { createMicrosoftRoutes } from './microsoft-routes.js';
 import { fetchConfig } from './config.js';
