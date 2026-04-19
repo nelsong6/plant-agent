@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Azure Login via OIDC
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ vars.ARM_CLIENT_ID }}
           tenant-id: ${{ vars.ARM_TENANT_ID }}
