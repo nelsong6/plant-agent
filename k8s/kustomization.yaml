@@ -2,12 +2,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: plant-agent
 resources:
-  - serviceaccount.yaml
-  - deployment.yaml
-  - service.yaml
-  - certificate.yaml
-  - xlistenerset.yaml
-  - httproute.yaml
+- serviceaccount.yaml
+- deployment.yaml
+- service.yaml
+- certificate.yaml
+- xlistenerset.yaml
+- httproute.yaml
 images:
-  - name: romainecr.azurecr.io/plant-agent
-    newTag: placeholder
+- name: romainecr.azurecr.io/plant-agent
+  newName: romainecr.azurecr.io/plant-agent
+  newTag: "9144664"
