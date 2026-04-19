@@ -6,8 +6,7 @@ Plant monitoring system: Raspberry Pi + camera captures photos of houseplants, u
 
 - `pi/` — Python FastAPI service on Raspberry Pi 5 (Camera Module 3 + Arducam B0283 pan-tilt bracket)
 - `frontend/` — Vite + React 19 + TypeScript + Tailwind CSS v4, hosted on Azure Static Web App (plants.romaine.life)
-- `packages/routes/` — `@nelsong6/plant-agent-routes` npm package: extracted Express router factories for the shared API
-- `backend/` — DELETED (was Node.js Express API on Azure Container App). Routes now live in `packages/routes/` and run in the shared API
+- `backend/` — Node.js Express API on AKS. Serves `/api/*` route factories from `backend/routes/` (plants, events, photos, capture, analysis, tasks, chat, push, notify) and Microsoft OAuth under `/auth/*`
 - `snapshot/` — SQLite snapshot generator (Node 20). Queries Cosmos DB + Blob Storage, writes `.db` file consumed by the frontend via sql.js/WASM. Runs every 4 hours via GitHub Actions cron
 - `tofu/` — OpenTofu infrastructure (resource group, blob storage, Cosmos DB, Container App, Static Web App)
 - `enclosure/` — 3D-printable enclosure for Pi 5 + Arducam B0283 pan-tilt camera. Parametric OpenSCAD source files plus a CadQuery Python script (`enclosure_cadquery.py`) that generates STEP files (B-Rep solids) for import into Fusion 360, SolidWorks, FreeCAD, etc.
