@@ -33,7 +33,7 @@ jobs:
       - name: Dispatch notifications
         run: |
           RESPONSE=$(curl -sf -X POST \
-            https://api.romaine.life/plant/api/notifications/dispatch \
+            https://plants.romaine.life/api/notifications/dispatch \
             -H "X-API-Key: ${{ steps.secrets.outputs.api_key }}" \
             -H "Content-Type: application/json")
           echo "$RESPONSE" | jq .
