@@ -3,10 +3,44 @@ resource "azurerm_cosmosdb_sql_database" "plant_agent" {
   name                = "PlantAgentDB"
   resource_group_name = local.infra.resource_group_name
   account_name        = local.infra.cosmos_db_account_name
+}
 
-  lifecycle {
-    ignore_changes = [throughput]
-  }
+# Serverless account has no throughput to ignore. DB + containers live on
+# the new account; imports adopt them after a prior `tofu state rm` drops
+# the old-account state entries.
+import {
+  to = azurerm_cosmosdb_sql_database.plant_agent
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB"
+}
+
+import {
+  to = azurerm_cosmosdb_sql_container.plants
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB/containers/plants"
+}
+
+import {
+  to = azurerm_cosmosdb_sql_container.events
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB/containers/events"
+}
+
+import {
+  to = azurerm_cosmosdb_sql_container.analyses
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB/containers/analyses"
+}
+
+import {
+  to = azurerm_cosmosdb_sql_container.chats
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB/containers/chats"
+}
+
+import {
+  to = azurerm_cosmosdb_sql_container.push_subscriptions
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB/containers/push-subscriptions"
+}
+
+import {
+  to = azurerm_cosmosdb_sql_container.rooms
+  id = "/subscriptions/aee0cbd2-8074-4001-b610-0f8edb4eaa3c/resourceGroups/infra/providers/Microsoft.DocumentDB/databaseAccounts/infra-cosmos-serverless/sqlDatabases/PlantAgentDB/containers/rooms"
 }
 
 resource "azurerm_cosmosdb_sql_container" "plants" {
