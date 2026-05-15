@@ -19,7 +19,7 @@ All files are parametric OpenSCAD — key dimensions (wall thickness, tolerances
 | `base.scad` | Bottom shell — export this as STL for printing |
 | `top.scad` | Top shell — export this as STL for printing |
 | `lib/pi5.scad` | Raspberry Pi 5 board model and dimensions |
-| `lib/arducam_b0283.scad` | Arducam B0283 bracket model and dimensions |
+| `lib/arducam-b0283.scad` | Arducam B0283 bracket model and dimensions |
 | `lib/common.scad` | Shared utility modules |
 | `enclosure_cadquery.py` | CadQuery script — generates STEP files |
 | `stl/` | Pre-exported STL files (when available) |
@@ -67,7 +67,7 @@ Open any `.scad` file and adjust the variables at the top:
 
 ### Arducam B0283 Dimensions
 
-The bracket dimensions in `lib/arducam_b0283.scad` are approximate. **Measure your actual bracket** and update these values before printing:
+The bracket dimensions in `lib/arducam-b0283.scad` are approximate. **Measure your actual bracket** and update these values before printing:
 
 - `b0283_base_w`, `b0283_base_d` — base plate size
 - `b0283_mount_spacing_x`, `b0283_mount_spacing_y` — mounting hole spacing

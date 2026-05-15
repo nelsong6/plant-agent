@@ -6,7 +6,7 @@
 
 use <lib/common.scad>
 use <lib/pi5.scad>
-use <lib/arducam_b0283.scad>
+use <lib/arducam-b0283.scad>
 
 // === Parametric Variables — Adjust These ===
 wall        = 2.4;       // wall thickness (should match base.scad)

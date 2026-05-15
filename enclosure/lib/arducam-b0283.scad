@@ -1,4 +1,4 @@
-// arducam_b0283.scad — Arducam B0283 Pan-Tilt Bracket Model
+// arducam-b0283.scad — Arducam B0283 Pan-Tilt Bracket Model
 // Reference: Arducam B0283 product specs (best-effort estimates)
 // All dimensions in millimeters
 //

@@ -7,7 +7,7 @@
 
 use <lib/common.scad>
 use <lib/pi5.scad>
-use <lib/arducam_b0283.scad>
+use <lib/arducam-b0283.scad>
 use <base.scad>
 use <top.scad>
 
