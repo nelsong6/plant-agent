@@ -24,7 +24,7 @@ spec:
       serviceAccountName: infra-shared
       containers:
         - name: plant-agent
-          image: romainecr.azurecr.io/plant-agent:placeholder
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
