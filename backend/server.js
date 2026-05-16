@@ -1,6 +1,6 @@
 // Per-app backend for plants.romaine.life. Serves the Vite-built React
-// frontend, the plant-agent route package, and Microsoft OAuth on the same
-// origin. Replaces the shared `api` mount at /plant.
+// frontend, the plant-agent route package, and the auth.romaine.life
+// delegation exchange under /api/auth/* on the same origin.
 import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
@@ -22,7 +22,7 @@ import {
   createNotifyRoutes,
 } from './routes/index.js';
 import { createRequireAuth } from './auth.js';
-import { createMicrosoftRoutes } from './microsoft-routes.js';
+import { createAuthRoutes } from './auth-routes.js';
 import { fetchConfig } from './config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -57,24 +57,19 @@ async function start() {
     aadCredentials: credential,
   });
 
-  // plant-agent uses 5 containers in PlantAgentDB. Account records for MS
-  // OIDC → JWT exchange still go to the shared WorkoutTrackerDB/workouts.
+  // plant-agent uses 5 containers in PlantAgentDB. Account records used to
+  // live in shared WorkoutTrackerDB/workouts via the per-app MS-OIDC flow;
+  // that's gone now (auth.romaine.life owns the user table).
   const plantDb = cosmosClient.database('PlantAgentDB');
   const plantsContainer = plantDb.container('plants');
   const eventsContainer = plantDb.container('events');
   const analysesContainer = plantDb.container('analyses');
   const chatsContainer = plantDb.container('chats');
   const pushSubscriptionsContainer = plantDb.container('push-subscriptions');
-  const accountContainer = cosmosClient.database('WorkoutTrackerDB').container('workouts');
 
   const requireAuth = createRequireAuth({ jwtSecret: config.jwtSigningSecret });
-  const msAuth = createMicrosoftRoutes({
-    jwtSecret: config.jwtSigningSecret,
-    microsoftClientIds: config.microsoftClientIds,
-    accountContainer,
-  });
 
-  app.use(msAuth);
+  app.use(createAuthRoutes({ jwtSecret: config.jwtSigningSecret, requireAuth }));
   app.use(createPlantRoutes({
     plantsContainer,
     requireAuth,

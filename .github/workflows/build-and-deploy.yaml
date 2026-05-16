@@ -9,7 +9,7 @@ on:
       - Dockerfile
       - .dockerignore
       - k8s/**
-      - .github/workflows/build-and-deploy.yml
+      - .github/workflows/build-and-deploy.yaml
   workflow_dispatch:
 
 permissions:
@@ -37,14 +37,6 @@ jobs:
           tenant-id: ${{ vars.ARM_TENANT_ID }}
           subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
 
-      - name: Fetch MICROSOFT_CLIENT_ID from App Configuration
-        run: |
-          MICROSOFT_CLIENT_ID=$(az appconfig kv show \
-            --name infra-appconfig \
-            --key plants/microsoft_oauth_client_id \
-            --query value -o tsv)
-          echo "MICROSOFT_CLIENT_ID=${MICROSOFT_CLIENT_ID}" >> $GITHUB_ENV
-
       - name: ACR login
         run: az acr login --name romainecr
 
@@ -52,9 +44,7 @@ jobs:
         run: |
           TAG="${GITHUB_SHA::7}"
           IMAGE="romainecr.azurecr.io/plant-agent:${TAG}"
-          docker build \
-            --build-arg VITE_MICROSOFT_CLIENT_ID="${MICROSOFT_CLIENT_ID}" \
-            -t "$IMAGE" .
+          docker build -t "$IMAGE" .
           docker push "$IMAGE"
           echo "TAG=${TAG}" >> $GITHUB_ENV
 
