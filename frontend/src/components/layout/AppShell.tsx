@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
-import { loginWithMicrosoft } from '../../auth/msal';
+import { startLogin } from '../../auth';
 import { useTheme } from '../../theme/ThemeContext';
 import { usePushSubscription } from '../../hooks/usePushSubscription';
 import { TabBar } from './TabBar';
@@ -99,7 +99,7 @@ export function AppShell() {
               </>
             ) : (
               <button
-                onClick={loginWithMicrosoft}
+                onClick={startLogin}
                 className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded border border-[#8C8C8C] bg-white text-[#5E5E5E] text-xs font-semibold cursor-pointer hover:bg-[#F2F2F2] active:bg-[#E1E1E1] transition-colors dark:bg-[#2F2F2F] dark:text-white dark:border-[#8C8C8C] dark:hover:bg-[#3A3A3A] dark:active:bg-[#444444]"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 21 21">
@@ -180,7 +180,7 @@ export function AppShell() {
                 </>
               ) : (
                 <button
-                  onClick={loginWithMicrosoft}
+                  onClick={startLogin}
                   className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded border border-[#8C8C8C] bg-white text-[#5E5E5E] text-xs font-semibold cursor-pointer hover:bg-[#F2F2F2] dark:bg-[#2F2F2F] dark:text-white dark:border-[#8C8C8C] dark:hover:bg-[#3A3A3A]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 21 21">

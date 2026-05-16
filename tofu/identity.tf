@@ -3,8 +3,8 @@
 # actually call:
 #   - Cosmos data on dbs/PlantAgentDB
 #   - KV Secrets User on the 5 secrets config.js reads
-#   - App Configuration Data Reader at store level (config.js calls
-#     listConfigurationSettings to enumerate `*/microsoft_oauth_client_id`)
+#   - App Configuration Data Reader at store level (config.js reads
+#     plants/cosmos_db_endpoint + plants/storage_account_endpoint)
 #   - Storage Blob Data Contributor on the `photos` container in
 #     `plantagentphotos`
 
@@ -31,7 +31,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "plant_agent_cosmos" {
 # to vault scope.
 locals {
   plant_agent_kv_secrets = [
-    "api-jwt-signing-secret",
+    "plant-agent-jwt-signing-secret",
     "plant-agent-anthropic-api-key",
     "plant-agent-vapid-public-key",
     "plant-agent-vapid-private-key",

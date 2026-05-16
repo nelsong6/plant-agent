@@ -1,21 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { User } from '../types';
-import { msalInstance, msalReady } from './msal';
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? '';
-
-/** Retry fetch up to `retries` times with exponential backoff (handles cold-start timeouts). */
-async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await fetch(url, options);
-    } catch (err) {
-      if (i === retries) throw err;
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
-    }
-  }
-  throw new Error('unreachable');
-}
+import { bootstrapAuth, getStoredToken, clearStoredToken, logout as authLogout } from './index';
 
 interface AuthState {
   user: User | null;
@@ -30,49 +15,30 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(() => getStoredToken());
   const [loading, setLoading] = useState(true);
 
-  // Parse existing JWT on mount
+  // Boot-time auth: try stored session → silent exchange via .romaine.life
+  // cookie → fall through unauthenticated. Mirrors the canonical pattern in
+  // tank-operator's frontend/src/auth.ts (the template for all
+  // .romaine.life apps' delegation).
   useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUser({ id: payload.sub, name: payload.name, email: payload.email, role: payload.role });
-      } catch {
-        setToken(null);
-        localStorage.removeItem('token');
-      }
-    }
-  }, [token]);
-
-  // Handle MSAL redirect response (runs on any page after Microsoft redirects back)
-  useEffect(() => {
+    let cancelled = false;
     (async () => {
-      await msalReady;
-      const response = await msalInstance.handleRedirectPromise();
-
-      if (response?.idToken) {
-        try {
-          const res = await fetchWithRetry(`${API_BASE}/auth/microsoft/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ credential: response.idToken }),
-          });
-
-          if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            console.error('Login failed:', res.status, body.error);
-          } else {
-            const data = await res.json();
-            setSession(data.token, data.user);
-          }
-        } catch (err) {
-          console.error('Login failed:', err);
+      try {
+        const result = await bootstrapAuth();
+        if (cancelled) return;
+        if (result) {
+          setToken(result.token);
+          setUser(result.user);
         }
+      } catch (err) {
+        console.error('bootstrapAuth threw:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
+    return () => { cancelled = true; };
   }, []);
 
   function setSession(newToken: string, newUser: User) {
@@ -81,8 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(newUser);
   }
 
-  function logout() {
-    localStorage.removeItem('token');
+  async function logout() {
+    await authLogout();
+    clearStoredToken();
     setToken(null);
     setUser(null);
   }

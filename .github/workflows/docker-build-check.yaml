@@ -56,7 +56,5 @@ jobs:
           file: Dockerfile
           push: false
           load: false
-          build-args: |
-            VITE_MICROSOFT_CLIENT_ID=docker-build-check
           cache-from: type=gha
           cache-to: type=gha,mode=max

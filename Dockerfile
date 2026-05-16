@@ -8,10 +8,8 @@ RUN npm ci
 
 COPY frontend/ ./
 
-# Build-time env. Vite inlines VITE_* vars into the bundle. VITE_API_BASE
-# intentionally omitted — the frontend already falls back to '' (same-origin).
-ARG VITE_MICROSOFT_CLIENT_ID=
-ENV VITE_MICROSOFT_CLIENT_ID=$VITE_MICROSOFT_CLIENT_ID
+# Build-time env intentionally minimal: VITE_API_BASE falls back to ''
+# (same-origin); auth_url is fetched at runtime from /api/config.
 
 RUN npm run build
 
